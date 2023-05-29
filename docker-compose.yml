@@ -1,67 +1,93 @@
 services:
+
+# ------------------------- Redis ----------------------------- #
+
   redis:
     image: redis
+
     cpus: 1
     mem_limit: 1G
     restart: unless-stopped
+
     ports:
       - 6379:6379
+
     volumes:
       - redis-data:/data
     tty: true
+
     command:
       - redis-server
       - --save 60 1
       - --loglevel notice
+
     healthcheck:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
       interval: 1s
       timeout: 3s
       retries: 5
+
     networks:
         - nyria
 
+# ------------------------- MariaDB ----------------------------- #
+
   mariadb:
     image: mariadb
+
     cpus: 1
     mem_limit: 3G
     restart: unless-stopped
-    volumes:
-      - mariadb-data:/var/lib/mysql
+
     ports:
       - 3306:3306
+
+    volumes:
+      - mariadb-data:/var/lib/mysql
     tty: true
+
     environment:
       MYSQL_ROOT_PASSWORD: Test123
       MYSQL_DATABASE: nyria
       MYSQL_USER: root
       MYSQL_PASSWORD: Test123
+
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 1s
       timeout: 3s
       retries: 5
+
     networks:
       - nyria
+
+# ------------------------- LavaLink ----------------------------- #
 
   lavalink:
     build:
       context: configs/lavalink
       dockerfile: Dockerfile
+
     cpus: 1
     mem_limit: 1G
     restart: unless-stopped
+
     ports:
       - 2333:2333
-    networks:
-      - nyria
+
+    volumes:
+      - lavalink-data:/lavalink/logs
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:2333/"]
       interval: 1s
       timeout: 3s
       retries: 5
-    volumes:
-      - lavalink-data:/lavalink/logs
+
+    networks:
+      - nyria
+
+# ------------------------- Nyria Bot ----------------------------- #
 
   nyria:
     depends_on:
