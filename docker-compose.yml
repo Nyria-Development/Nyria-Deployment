@@ -56,7 +56,7 @@ services:
     networks:
       - nyria
     healthcheck:
-      test: []
+      test: ["CMD", "curl", "-f", "http://localhost:2333/"]
       interval: 1s
       timeout: 3s
       retries: 5
