@@ -12,3 +12,4 @@
 
 /.idea
 .env
+/nyriaBot/config/login.json
