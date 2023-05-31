@@ -16,6 +16,7 @@ services:
 
   redis:
     container_name: redis
+
     image: redis
 
     cpus: 1
@@ -40,13 +41,11 @@ services:
       timeout: 3s
       retries: 5
 
-    networks:
-        - nyria
-
 # ------------------------- MariaDB ----------------------------- #
 
   mariadb:
     container_name: mariadb
+
     image: mariadb
 
     cpus: 1
@@ -68,17 +67,15 @@ services:
 
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      interval: 1s
+      interval: 5s
       timeout: 3s
       retries: 5
-
-    networks:
-      - nyria
 
 # ------------------------- LavaLink ----------------------------- #
 
   lavalink:
     container_name: lavalink
+
     build:
       context: lavalink
       dockerfile: Dockerfile
@@ -93,35 +90,32 @@ services:
     volumes:
       - lavalink-data:/lavalink/logs
 
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:2333/"]
-      interval: 1s
-      timeout: 3s
-      retries: 5
-
-    networks:
-      - nyria
-
 # ------------------------- Nyria Bot ----------------------------- #
 
   nyria-bot:
     container_name: nyria-bot
+
     depends_on:
-      lavalink:
-        condition: service_healthy
       mariadb:
         condition: service_healthy
       redis:
         condition: service_healthy
+      lavalink:
+        condition: service_started
 
     build:
       context: nyriaBot
       dockerfile: Dockerfile
 
+    cpus: 1
+    mem_limit: 8G
+    restart: unless-stopped
+
     ports:
       - 1384:1384
 
-    restart: unless-stopped
+    links:
+      - "mariadb:db"
 
 # ------------------------- Volumes ----------------------------- #
 
@@ -129,9 +123,3 @@ volumes:
   redis-data:
   mariadb-data:
   lavalink-data:
-
-# ------------------------- Network ----------------------------- #
-
-networks:
-  nyria:
-    name: nyria

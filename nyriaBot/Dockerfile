@@ -10,7 +10,7 @@
 # No warranty is provided for the code, and Nyria shall not be liable for any claims, damages,
 # or other liability arising from the use or inability to use the code.
 
-FROM python:3.11-slim
+FROM python:3.11
 
 USER 0:0
 
@@ -19,6 +19,7 @@ COPY config/ /
 
 WORKDIR /nyriaBot
 RUN git clone https://github.com/Nyria-Development/Bot-Nyria.git /nyriaBot
+RUN git pull
 
 RUN pip install --upgrade pip
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
